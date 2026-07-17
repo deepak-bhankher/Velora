@@ -23,7 +23,7 @@ const C = {
 const NAV_ITEMS = [
   { label: "Home", href: "#home" },
   { label: "About", href: "#about" },
-  { label: "Category", href: "#category" },
+  { label: "Categories", href: "#category" },
   { label: "Product", href: "#product" },
   { label: "Contact", href: "#contact" },
 ];
@@ -55,7 +55,7 @@ export default function Navbar() {
       <nav
         className="sticky top-0 z-50 transition-shadow duration-300"
         style={{
-          background: C.navy,
+          background: "linear-gradient(135deg, #8C2233, #6E1826)",
           boxShadow: scrolled ? "0 6px 20px rgba(0,0,0,0.28)" : "0 1px 0 rgba(255,255,255,0.06)",
         }}
       >
@@ -72,26 +72,19 @@ export default function Navbar() {
             </button>
 
             {/* Logo */}
-            <a href="#" className="flex items-center gap-2 shrink-0">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-lg font-serif text-base font-bold"
-                style={{
-                  background: `linear-gradient(135deg, ${C.goldLight}, ${C.gold})`,
-                  color: C.navy,
-                }}
-              >
-                V
-              </span>
-              <span className="font-serif text-xl tracking-wide" style={{ color: C.white }}>
-                VELORA
-              </span>
+            <a href="#" className="flex justify-center ">
+              <img
+                src="/logo.png"
+                alt="Velora"
+                className="w-14 object-contain"
+              />
             </a>
 
             {/* Search — desktop */}
             <div className="hidden md:flex flex-1 max-w-xl mx-4">
               <div
                 className="flex w-full items-center gap-2 rounded-full px-4 py-2 transition-colors"
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.16)" }}
               >
                 <Search size={17} style={{ color: C.silver }} />
                 <input
@@ -133,7 +126,7 @@ export default function Navbar() {
           >
             <div
               className="flex items-center gap-2 rounded-full px-4 py-2 mb-3"
-              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.16)" }}
             >
               <Search size={16} style={{ color: C.silver }} />
               <input
@@ -204,14 +197,12 @@ export default function Navbar() {
           className="flex items-center justify-between px-5 pt-5 pb-4"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <span className="flex items-center gap-2">
-            <span
-              className="flex h-8 w-8 items-center justify-center rounded-lg font-serif text-sm font-bold"
-              style={{ background: `linear-gradient(135deg, ${C.goldLight}, ${C.gold})`, color: C.navy }}
-            >
-              V
-            </span>
-            <span className="font-serif text-lg" style={{ color: C.white }}>VELORA</span>
+          <span className="flex items-center">
+            <img
+              src="/logo.png"
+              alt="Velora"
+              className="h-9 w-auto object-contain"
+            />
           </span>
           <button
             onClick={() => setOpen(false)}

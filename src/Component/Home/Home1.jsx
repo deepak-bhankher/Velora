@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// 👇 Apni 6 images yahan import kar (jo naam/path tere assets folder me hai wahi daal de)
 import img1 from "/home1.png";
 import img2 from "/home2.png";
 import img3 from "/home3.png";
