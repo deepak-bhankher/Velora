@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import {
   Search,
   User,
@@ -53,14 +54,32 @@ export default function Navbar() {
     <div style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
       {/* ---- Main navbar ---- */}
       <nav
-        className="sticky top-0 z-50 transition-shadow duration-300"
+        className="sticky top-0 z-50 transition-shadow duration-300 relative overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #8C2233, #6E1826)",
-          boxShadow: scrolled ? "0 6px 20px rgba(0,0,0,0.28)" : "0 1px 0 rgba(255,255,255,0.06)",
+          background:
+            "linear-gradient(115deg, #0B1B3A 0%, #7A1F2B 30%, #8C2233 50%, #6E1826 68%, #0F0A0C 100%)",
+          boxShadow: scrolled ? "0 6px 24px rgba(0,0,0,0.35)" : "0 1px 0 rgba(255,255,255,0.06)",
         }}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-          <div className="flex h-16 items-center gap-4">
+        {/* premium diagonal shine */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.10) 48%, rgba(255,255,255,0.02) 55%, transparent 65%)",
+          }}
+        />
+        {/* soft gold glow accent */}
+        <div
+          className="pointer-events-none absolute -top-10 left-0 h-40 w-72"
+          style={{
+            background: "radial-gradient(circle, rgba(201,162,39,0.35), transparent 70%)",
+            filter: "blur(10px)",
+          }}
+        />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+          <div className="flex h-20 items-center gap-4">
             {/* Mobile menu toggle */}
             <button
               onClick={() => setOpen(true)}
@@ -72,11 +91,21 @@ export default function Navbar() {
             </button>
 
             {/* Logo */}
-            <a href="#" className="flex items-center justify-center h-11 w-11 shrink-0">
-              <img
+            <a href="#" className="flex items-center justify-center h-16 w-16 sm:h-[68px] sm:w-[68px] shrink-0 py-1.5">
+              <motion.img
                 src="/logo.png"
                 alt="Velora"
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain drop-shadow-[0_0_10px_rgba(201,162,39,0.35)]"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{
+                  opacity: 1,
+                  y: [0, -3, 0],
+                }}
+                transition={{
+                  opacity: { duration: 0.5, ease: "easeOut" },
+                  y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
+                }}
+                whileHover={{ scale: 1.08, rotate: -2 }}
               />
             </a>
 
