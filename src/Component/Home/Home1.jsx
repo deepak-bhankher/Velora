@@ -11,7 +11,7 @@ import img6 from "/home6.png";
 
 const SLIDES = [img1, img2, img3, img4, img5, img6];
 
-const AUTO_DELAY = 2000; // ms
+const AUTO_DELAY = 5000; // ms
 
 // Same palette as Navbar.jsx
 const C = {
