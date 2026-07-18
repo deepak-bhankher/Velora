@@ -34,6 +34,8 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const searchRef = useRef(null);
+  const navRef = useRef(null);
+  const [navHeight, setNavHeight] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -50,11 +52,28 @@ export default function Navbar() {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
+  // Keep a spacer in sync with the navbar's real height so fixed
+  // positioning never causes page content to jump/hide underneath
+  useEffect(() => {
+    if (!navRef.current) return;
+    const el = navRef.current;
+    const update = () => setNavHeight(el.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
       {/* ---- Main navbar ---- */}
       <nav
-        className="sticky top-0 z-50 transition-shadow duration-300 relative overflow-hidden"
+        ref={navRef}
+        className="fixed top-0 left-0 w-full z-50 transition-shadow duration-300 relative overflow-hidden"
         style={{
           background:
             "linear-gradient(90deg, #9A2338 0%, #7A1F2B 22%, #4A2038 42%, #16244A 62%, #0B1B3A 100%)",
@@ -202,6 +221,9 @@ export default function Navbar() {
           style={{ background: `linear-gradient(90deg, ${C.maroon}, ${C.gold} 45%, ${C.goldLight} 55%, ${C.silver})` }}
         />
       </nav>
+
+      {/* Spacer so fixed navbar doesn't overlap page content */}
+      <div style={{ height: navHeight }} />
 
       {/* ---- Mobile drawer ---- */}
       <div

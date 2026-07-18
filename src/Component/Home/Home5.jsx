@@ -154,7 +154,7 @@ function OurWork() {
           </div>
 
           <button
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold tracking-wide uppercase transition-transform duration-200 hover:translate-x-1"
+            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 text-sm font-semibold tracking-wide uppercase transition-transform duration-200 hover:translate-x-1"
             style={{ color: C.ink }}
           >
             View Gallery

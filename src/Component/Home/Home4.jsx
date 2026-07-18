@@ -1,6 +1,5 @@
-import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 // Same palette used across Home3 — keep everything visually consistent
 const C = {
@@ -35,21 +34,21 @@ const PRODUCTS = [
     tag: "NEW",
     title: "Eco Essentials Kit",
     subtitle: "Sustainable. Useful. Memorable.",
-     image: "home20.png",
+    image: "home20.png",
   },
   {
     id: 4,
     tag: "NEW",
     title: "Festive Delight Box",
     subtitle: "Celebrations made special.",
- image: "home21.png",
+    image: "home21.png",
   },
 ];
 
 function ProductCard({ product, index }) {
   return (
     <motion.div
-      className="snap-start shrink-0 w-[78%] xs:w-[65%] sm:w-[46%] lg:w-[24%]"
+      className="w-full"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
@@ -70,7 +69,7 @@ function ProductCard({ product, index }) {
           </span>
         </div>
 
-        <div className="pt-4 pb-1">
+        <div className="pt-4 pb-1 text-center">
           <h3 className="text-base sm:text-lg font-bold" style={{ color: C.ink }}>
             {product.title}
           </h3>
@@ -78,16 +77,26 @@ function ProductCard({ product, index }) {
             {product.subtitle}
           </p>
 
-          <button
-            className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wide uppercase transition-all duration-200"
-            style={{ color: C.ink }}
-          >
-            View Details
-            <ArrowRight
-              size={15}
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </button>
+          <div className="flex justify-center pb-3">
+            <button
+              className="mt-3 inline-flex items-center gap-2 cursor-pointer rounded-full border-2 px-5 py-2 text-xs sm:text-sm font-semibold tracking-wide uppercase transition-colors duration-200"
+              style={{ borderColor: C.gold, color: C.gold, background: "transparent" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = C.gold;
+                e.currentTarget.style.color = C.cream;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = C.gold;
+              }}
+            >
+              View Details
+              <ArrowRight
+                size={15}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -95,29 +104,6 @@ function ProductCard({ product, index }) {
 }
 
 export default function Home4() {
-  const scrollerRef = useRef(null);
-  const [activeDot, setActiveDot] = useState(0);
-  const dotCount = PRODUCTS.length;
-
-  const scrollByCard = (dir) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const cardWidth = el.firstChild ? el.firstChild.offsetWidth + 24 : 300;
-    el.scrollBy({ left: dir * cardWidth, behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const cardWidth = el.firstChild ? el.firstChild.offsetWidth + 24 : 300;
-      const idx = Math.round(el.scrollLeft / cardWidth);
-      setActiveDot(Math.min(idx, dotCount - 1));
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [dotCount]);
-
   return (
     <section className="w-full relative" style={{ background: C.creamDeep, fontFamily: "Inter, system-ui, sans-serif" }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-14 sm:py-20">
@@ -147,50 +133,10 @@ export default function Home4() {
           </p>
         </motion.div>
 
-        {/* Carousel */}
-        <div className="relative">
-          {/* Left arrow */}
-          <button
-            onClick={() => scrollByCard(-1)}
-            aria-label="Previous"
-            className="hidden sm:flex absolute -left-4 lg:-left-6 top-[38%] -translate-y-1/2 z-10 h-11 w-11 items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-105"
-            style={{ background: C.darkGreen }}
-          >
-            <ChevronLeft size={20} style={{ color: C.cream }} />
-          </button>
-
-          <div
-            ref={scrollerRef}
-            className="flex gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory pb-2 no-scrollbar"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {PRODUCTS.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
-
-          {/* Right arrow */}
-          <button
-            onClick={() => scrollByCard(1)}
-            aria-label="Next"
-            className="hidden sm:flex absolute -right-4 lg:-right-6 top-[38%] -translate-y-1/2 z-10 h-11 w-11 items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-105"
-            style={{ background: C.darkGreen }}
-          >
-            <ChevronRight size={20} style={{ color: C.cream }} />
-          </button>
-        </div>
-
-        {/* Dot pagination */}
-        <div className="flex items-center justify-center gap-2 mt-8">
-          {PRODUCTS.map((_, i) => (
-            <span
-              key={i}
-              className="h-1.5 rounded-full transition-all duration-300"
-              style={{
-                width: activeDot === i ? "22px" : "7px",
-                background: activeDot === i ? C.darkGreen : `${C.darkGreen}33`,
-              }}
-            />
+        {/* Grid — no scroll, all 4 visible */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {PRODUCTS.map((product, i) => (
+            <ProductCard key={product.id} product={product} index={i} />
           ))}
         </div>
       </div>
