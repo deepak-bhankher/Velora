@@ -1,0 +1,442 @@
+import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Type,
+  ImagePlus,
+  Shapes,
+  Undo2,
+  Redo2,
+  Eye,
+  X,
+  Plus,
+  Minus,
+  Settings,
+  UploadCloud,
+  Contrast,
+  Palette,
+  RotateCcw,
+} from "lucide-react";
+
+const C = {
+  navy: "#0B1B3A",
+  navyDeep: "#071227",
+  gold: "#C9A227",
+  goldLight: "#E8C874",
+  maroon: "#7A1F2B",
+  silver: "#B8BCC2",
+  white: "#FFFFFF",
+  ink: "#1C2333",
+  paper: "#F7F5F1",
+};
+
+const RECOLOR_SWATCHES = [
+  { id: "black", hex: "#1C2333" },
+  { id: "blue", hex: "#2b3a9e" },
+  { id: "green", hex: "#1fa97a" },
+  { id: "red", hex: "#d33f3f" },
+];
+
+const TOOLS = [
+  { id: "text", label: "Text", icon: Type },
+  { id: "uploads", label: "Uploads", icon: ImagePlus },
+  { id: "graphics", label: "Graphics", icon: Shapes },
+];
+
+export default function DesignStudio() {
+  const navigate = useNavigate();
+  const [activeTool, setActiveTool] = useState("uploads");
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [showAdjust, setShowAdjust] = useState(false);
+  const [contrast, setContrast] = useState(100);
+  const [recolor, setRecolor] = useState(null);
+  const [inverted, setInverted] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const [showWarning, setShowWarning] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFile = (file) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => setUploadedImage(e.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFile(e.dataTransfer.files?.[0]);
+  };
+
+  const resetAdjustments = () => {
+    setContrast(100);
+    setRecolor(null);
+    setInverted(false);
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    resetAdjustments();
+  };
+
+  const handleNext = () => {
+    if (!uploadedImage) {
+      setShowWarning(true);
+      setTimeout(() => setShowWarning(false), 2500);
+      return;
+    }
+    // Design ready — go back to the product page (or swap for navigate("/cart") etc.)
+    navigate(-1);
+  };
+
+  return (
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#FAFAF8", minHeight: "100vh" }}>
+      {/* ============ SECTION A — TOP BAR ============ */}
+      <div
+        className="flex items-center justify-between px-4 sm:px-6 py-3 sticky top-0 z-40"
+        style={{ background: C.white, borderBottom: "1px solid rgba(11,27,58,0.08)" }}
+      >
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Link to="/" className="flex h-8 w-8 items-center justify-center rounded-full font-bold text-[13px]" style={{ background: C.navy, color: C.goldLight }}>
+            V
+          </Link>
+          <span className="hidden sm:block text-[15px] font-bold" style={{ color: C.ink }}>
+            Fidgety
+          </span>
+          <div className="hidden sm:flex items-center gap-1 pl-2" style={{ borderLeft: "1px solid rgba(11,27,58,0.12)" }}>
+            <button className="flex h-8 w-8 items-center justify-center rounded-md opacity-40">
+              <Undo2 size={16} style={{ color: C.ink }} />
+            </button>
+            <button className="flex h-8 w-8 items-center justify-center rounded-md opacity-40">
+              <Redo2 size={16} style={{ color: C.ink }} />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 sm:gap-5">
+          <button className="hidden sm:flex items-center gap-1.5 text-[13px] font-semibold" style={{ color: C.ink }}>
+            <Eye size={16} />
+            Preview
+          </button>
+          <span className="text-[14px] font-bold" style={{ color: C.navy }}>
+            Rs.1,500.00
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={handleNext}
+            className="rounded-full cursor-pointer px-4 sm:px-5 py-2 text-[13px] font-semibold"
+            style={{ background: C.navy, color: C.goldLight }}
+          >
+            Next
+          </motion.button>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row">
+        {/* ============ SECTION B — LEFT TOOL PANEL ============ */}
+        <div className="flex lg:flex-col lg:w-24 shrink-0 border-b lg:border-b-0 lg:border-r" style={{ borderColor: "rgba(11,27,58,0.08)", background: C.white }}>
+          {TOOLS.map((t) => {
+            const Icon = t.icon;
+            const active = activeTool === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTool(t.id)}
+                className="flex flex-1 lg:flex-none flex-col items-center justify-center gap-1.5 py-4"
+                style={{ background: active ? "rgba(201,162,39,0.1)" : "transparent", borderRight: active ? `2px solid ${C.gold}` : "2px solid transparent" }}
+              >
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-lg"
+                  style={{ background: active ? C.gold : "#F1F0EC", color: active ? C.navy : "#7A8092" }}
+                >
+                  <Icon size={17} />
+                </span>
+                <span className="text-[11px] font-medium" style={{ color: active ? C.navy : "#7A8092" }}>
+                  {t.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tool sub-panel */}
+        <div className="w-full lg:w-72 shrink-0 p-5" style={{ background: C.white, borderRight: "1px solid rgba(11,27,58,0.08)" }}>
+          {activeTool === "uploads" && (
+            <>
+              <h3 className="text-[16px] font-bold mb-3" style={{ color: C.ink }}>
+                Uploads
+              </h3>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+              />
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex w-full items-center cursor-pointer justify-center gap-2 rounded-lg py-3 text-[13.5px] font-semibold"
+                style={{ background: C.gold, color: C.navy }}
+              >
+                <Plus size={16} />
+                Upload Image
+              </motion.button>
+              <p className="mt-3 text-[12px] leading-relaxed" style={{ color: "#7A8092" }}>
+                Or drag and drop an image straight onto the box on the right. PNG or JPG, up to 25MB.
+              </p>
+            </>
+          )}
+
+          {activeTool === "text" && (
+            <>
+              <h3 className="text-[16px] font-bold mb-3" style={{ color: C.ink }}>
+                Text
+              </h3>
+              <button className="flex w-full items-center justify-center gap-2 rounded-lg py-3 text-[13.5px] font-semibold" style={{ background: "#EFEDE7", color: C.ink }}>
+                <Plus size={16} />
+                Add text
+              </button>
+            </>
+          )}
+
+          {activeTool === "graphics" && (
+            <>
+              <h3 className="text-[16px] font-bold mb-3" style={{ color: C.ink }}>
+                Graphics
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="aspect-square rounded-lg flex items-center justify-center" style={{ background: "#EFEDE7" }}>
+                    <Shapes size={16} style={{ color: "#B8BCC2" }} />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ============ SECTION C — CANVAS ============ */}
+        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative" style={{ minHeight: "70vh" }}>
+          <div className="relative w-full max-w-2xl">
+            {/* product texture background */}
+            <div
+              className="relative w-full overflow-hidden rounded-md"
+              style={{
+                aspectRatio: "16 / 10",
+                background: "linear-gradient(135deg, #c99a5f 0%, #b9863f 45%, #a97934 100%)",
+                boxShadow: "0 12px 32px rgba(11,27,58,0.15)",
+              }}
+            >
+              {/* guide labels */}
+              <span className="absolute top-3 right-24 rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: "rgba(47,125,70,0.15)", color: "#2F7D46" }}>
+                Safety Area
+              </span>
+              <span className="absolute top-3 right-3 rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: "rgba(11,27,58,0.1)", color: C.navy }}>
+                Bleed
+              </span>
+
+              {/* safe area / drop zone */}
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={onDrop}
+                className="absolute inset-[14%] rounded-sm flex items-center justify-center overflow-hidden"
+                style={{ border: `2px dashed ${dragOver ? C.gold : "#7FB8D9"}`, background: dragOver ? "rgba(201,162,39,0.12)" : "transparent" }}
+              >
+                {!uploadedImage ? (
+                  <div className="flex flex-col items-center gap-2 text-center px-4">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center cursor-pointer gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold"
+                      style={{ background: C.white, color: C.ink }}
+                    >
+                      <UploadCloud size={16} />
+                      Upload design
+                    </button>
+                    <span className="text-[12.5px]" style={{ color: C.white, textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+                      or drag and drop here
+                    </span>
+                  </div>
+                ) : (
+                  <div className="relative h-full w-full group">
+                    <img
+                      src={uploadedImage}
+                      alt="Your design"
+                      className="h-full w-full object-contain"
+                      style={{
+                        filter: `contrast(${contrast}%) ${inverted ? "invert(1)" : ""}`,
+                      }}
+                    />
+                    {recolor && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ background: recolor, mixBlendMode: "color", opacity: 0.85 }}
+                      />
+                    )}
+                    <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setShowAdjust(true)}
+                        className="flex h-7 w-7 items-center justify-center rounded-full"
+                        style={{ background: "rgba(11,27,58,0.8)", color: C.white }}
+                      >
+                        <Settings size={13} />
+                      </button>
+                      <button
+                        onClick={removeImage}
+                        className="flex h-7 w-7 items-center justify-center rounded-full"
+                        style={{ background: "rgba(122,31,43,0.85)", color: C.white }}
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between text-[11px]" style={{ color: "#9CA0AA" }}>
+              <span>3cm</span>
+              <span>8cm</span>
+            </div>
+          </div>
+
+          {/* ============ SECTION D — ZOOM BAR ============ */}
+          <div
+            className="mt-6 flex items-center gap-3 rounded-full px-4 py-2"
+            style={{ background: C.white, boxShadow: "0 4px 16px rgba(11,27,58,0.12)" }}
+          >
+            <button onClick={() => setZoom((z) => Math.max(50, z - 10))} className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: "#F1F0EC" }}>
+              <Minus size={13} style={{ color: C.ink }} />
+            </button>
+            <span className="text-[12.5px] font-semibold w-10 text-center" style={{ color: C.ink }}>
+              {zoom}%
+            </span>
+            <button onClick={() => setZoom((z) => Math.min(200, z + 10))} className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: "#F1F0EC" }}>
+              <Plus size={13} style={{ color: C.ink }} />
+            </button>
+            <div className="w-px h-5" style={{ background: "rgba(11,27,58,0.12)" }} />
+            <button className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: "#F1F0EC" }}>
+              <Settings size={13} style={{ color: C.ink }} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ============ SECTION E — ADJUST IMAGE MODAL ============ */}
+      <AnimatePresence>
+        {showAdjust && uploadedImage && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAdjust(false)}
+              className="fixed inset-0 z-[60]"
+              style={{ background: "rgba(7,18,39,0.55)" }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.25 }}
+              className="fixed left-1/2 top-1/2 z-[70] -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-md rounded-2xl p-6"
+              style={{ background: C.white }}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-[19px] font-bold" style={{ color: C.ink }}>
+                  Adjust image
+                </h3>
+                <button onClick={() => setShowAdjust(false)}>
+                  <X size={18} style={{ color: "#7A8092" }} />
+                </button>
+              </div>
+
+              {/* Contrast */}
+              <div className="mb-5">
+                <p className="flex items-center gap-1.5 text-[13px] font-semibold mb-2" style={{ color: C.ink }}>
+                  <Contrast size={14} />
+                  Contrast
+                </p>
+                <input
+                  type="range"
+                  min="50"
+                  max="150"
+                  value={contrast}
+                  onChange={(e) => setContrast(Number(e.target.value))}
+                  className="w-full"
+                  style={{ accentColor: C.navy }}
+                />
+              </div>
+
+              {/* Recolor */}
+              <div className="mb-5">
+                <p className="flex items-center gap-1.5 text-[13px] font-semibold mb-2" style={{ color: C.ink }}>
+                  <Palette size={14} />
+                  Available colors
+                </p>
+                <div className="flex items-center gap-2.5">
+                  {RECOLOR_SWATCHES.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setRecolor(recolor === s.hex ? null : s.hex)}
+                      className="h-9 w-9 rounded-full"
+                      style={{ background: s.hex, border: recolor === s.hex ? `3px solid ${C.gold}` : "3px solid transparent", boxShadow: "0 0 0 1px rgba(11,27,58,0.15)" }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Invert + reset */}
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => setInverted((v) => !v)}
+                  className="flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[12.5px] font-semibold"
+                  style={{ background: inverted ? C.navy : "#F1F0EC", color: inverted ? C.goldLight : C.ink }}
+                >
+                  Invert colors
+                </button>
+                <button
+                  onClick={resetAdjustments}
+                  className="flex items-center gap-1.5 rounded-lg px-3.5 py-2.5 text-[12.5px] font-semibold"
+                  style={{ background: "#F1F0EC", color: C.ink }}
+                >
+                  <RotateCcw size={13} />
+                  Reset
+                </button>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowAdjust(false)}
+                className="mt-6 w-full rounded-full py-3 text-[13.5px] font-semibold"
+                style={{ background: C.gold, color: C.navy }}
+              >
+                Done
+              </motion.button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ---- Warning toast: no design uploaded yet ---- */}
+      <AnimatePresence>
+        {showWarning && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-6 left-1/2 z-[80] -translate-x-1/2 rounded-full px-5 py-3 text-[13px] font-semibold"
+            style={{ background: C.maroon, color: C.white, boxShadow: "0 8px 24px rgba(0,0,0,0.25)" }}
+          >
+            Please upload a design before continuing
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ShoppingBag, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingBag, Eye, X, ChevronRight, SlidersHorizontal, ImageOff } from "lucide-react";
 
 const C = {
   navy: "#0B1B3A",
@@ -17,73 +17,87 @@ const C = {
 const ACCENT = "#5B5E66";
 const ACCENT_LIGHT = "#8A8D96";
 
+// 👉 Image path yaha daalna — public folder me file rakh ke path likh dena
+// e.g. image: "/products/fidgety.jpg"
 const PRODUCTS = [
   {
     "name": "Crestcap",
-    "tagline": "Embroidered Baseball Cap",
     "code": "UG-AP03",
     "price": 499,
-    "seed": "apparel-UG-AP03"
+    "desc": "Embroidered baseball cap with an adjustable strap for a comfortable fit.",
+    "image": ""
   },
   {
     "name": "Coreline",
-    "tagline": "Cotton Crew Neck T-Shirt",
     "code": "UG-AP11",
     "price": 649,
-    "seed": "apparel-UG-AP11"
+    "desc": "Soft cotton crew neck tee that holds its shape wash after wash.",
+    "image": ""
   },
   {
     "name": "Layerup",
-    "tagline": "Zip-Up Hoodie Jacket",
     "code": "UG-AP19",
     "price": 1599,
-    "seed": "apparel-UG-AP19"
+    "desc": "Zip-up hoodie with a fleece lining, built for cooler evenings.",
+    "image": ""
   },
   {
     "name": "Wristband",
-    "tagline": "Silicone Fitness Wristband",
     "code": "UG-AP02",
     "price": 199,
-    "seed": "apparel-UG-AP02"
+    "desc": "Flexible silicone wristband for workouts, runs or everyday wear.",
+    "image": ""
   },
   {
     "name": "Toteform",
-    "tagline": "Canvas Tote Bag",
     "code": "UG-AP07",
     "price": 449,
-    "seed": "apparel-UG-AP07"
+    "desc": "Sturdy canvas tote that carries groceries, books or gym gear.",
+    "image": ""
   },
   {
     "name": "Beanie",
-    "tagline": "Ribbed Knit Winter Beanie",
     "code": "UG-AP14",
     "price": 399,
-    "seed": "apparel-UG-AP14"
+    "desc": "Ribbed knit beanie that keeps you warm without losing style.",
+    "image": ""
   },
   {
     "name": "PoloLine",
-    "tagline": "Pique Cotton Polo Shirt",
     "code": "UG-AP21",
     "price": 899,
-    "seed": "apparel-UG-AP21"
+    "desc": "Pique cotton polo shirt, smart enough for the office, easy for weekends.",
+    "image": ""
   },
   {
     "name": "SockSet",
-    "tagline": "Ankle Socks Pack of 3",
     "code": "UG-AP05",
     "price": 299,
-    "seed": "apparel-UG-AP05"
+    "desc": "A pack of three ankle socks made from breathable cotton blend.",
+    "image": ""
   },
   {
     "name": "Scarfline",
-    "tagline": "Lightweight Printed Scarf",
     "code": "UG-AP16",
     "price": 549,
-    "seed": "apparel-UG-AP16"
+    "desc": "Lightweight printed scarf that adds a finishing touch to any outfit.",
+    "image": ""
   }
 ];
 
-function ProductCard({ product, index }) {
+function ProductImage({ image, name }) {
+  if (!image) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-1.5" style={{ background: "#ECECEC" }}>
+        <ImageOff size={22} style={{ color: "#B8BCC2" }} />
+        <span className="text-[10.5px]" style={{ color: "#9CA0AA" }}>Image coming soon</span>
+      </div>
+    );
+  }
+  return <img src={image} alt={name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]" />;
+}
+
+function ProductCard({ product, index, onPreview }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -98,42 +112,36 @@ function ProductCard({ product, index }) {
         boxShadow: "0 2px 10px rgba(11,27,58,0.05)",
       }}
     >
-      <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1", background: "#EFEFEF" }}>
-        <img
-          src={`https://picsum.photos/seed/${product.seed}/500/500`}
-          alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-        />
+      <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+        <ProductImage image={product.image} name={product.name} />
         <span
           className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide"
           style={{ background: ACCENT, color: C.white }}
         >
           APPAREL
         </span>
-        <span
-          className="absolute bottom-3 right-3 rounded-md px-2 py-1 text-[11px] font-semibold"
+        <motion.button
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
+          onClick={() => onPreview(product)}
+          className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
           style={{ background: "rgba(11,27,58,0.85)", color: C.goldLight }}
         >
-          MRP ₹{product.price}
-        </span>
+          <Eye size={13} />
+          Preview
+        </motion.button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 px-4 pt-3.5 pb-4">
+      <div className="flex flex-1 flex-col gap-1.5 px-4 pt-3.5 pb-4">
         <h3 className="text-[15px] font-bold" style={{ color: C.ink }}>
           {product.name}
         </h3>
-        <p className="text-[12.5px]" style={{ color: ACCENT }}>
-          {product.tagline}
-        </p>
-        <p className="text-[11.5px]" style={{ color: "#8A8F9C" }}>
-          Item Code {product.code}
-        </p>
-        <p className="text-[11.5px]" style={{ color: "#8A8F9C" }}>
-          Brand Urban Gear
+        <p className="text-[12.5px] leading-snug line-clamp-2" style={{ color: "#6B7180" }}>
+          {product.desc}
         </p>
 
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-[15px] font-bold" style={{ color: C.navy }}>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-[16px] font-bold" style={{ color: C.navy }}>
             Rs.{product.price}.00
           </span>
           <motion.button
@@ -151,8 +159,69 @@ function ProductCard({ product, index }) {
   );
 }
 
+function PreviewModal({ product, onClose }) {
+  return (
+    <AnimatePresence>
+      {product && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[60]"
+            style={{ background: "rgba(7,18,39,0.65)" }}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed left-1/2 top-1/2 z-[70] -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-lg overflow-hidden rounded-2xl"
+            style={{ background: C.white }}
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full"
+              style={{ background: "rgba(11,27,58,0.75)", color: C.white }}
+            >
+              <X size={16} />
+            </button>
+            <div style={{ aspectRatio: "1 / 1" }}>
+              <ProductImage image={product.image} name={product.name} />
+            </div>
+            <div className="p-5">
+              <h3 className="text-[19px] font-bold" style={{ color: C.ink }}>
+                {product.name}
+              </h3>
+              <p className="mt-1.5 text-[13.5px] leading-relaxed" style={{ color: "#6B7180" }}>
+                {product.desc}
+              </p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[19px] font-bold" style={{ color: C.navy }}>
+                  Rs.{product.price}.00
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold"
+                  style={{ background: ACCENT, color: C.white }}
+                >
+                  <ShoppingBag size={15} />
+                  Add to Cart
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function ApparelCategory() {
   const [sort, setSort] = useState("popular");
+  const [previewProduct, setPreviewProduct] = useState(null);
 
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: C.paper, minHeight: "100vh" }}>
@@ -231,10 +300,12 @@ export default function ApparelCategory() {
           {[...PRODUCTS]
             .sort((a, b) => (sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : 0))
             .map((p, i) => (
-              <ProductCard key={p.code} product={p} index={i} />
+              <ProductCard key={p.code} product={p} index={i} onPreview={setPreviewProduct} />
             ))}
         </div>
       </div>
+
+      <PreviewModal product={previewProduct} onClose={() => setPreviewProduct(null)} />
     </div>
   );
 }

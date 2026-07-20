@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ShoppingBag, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingBag, Eye, X, ChevronRight, SlidersHorizontal, ImageOff } from "lucide-react";
 
 const C = {
   navy: "#0B1B3A",
@@ -17,73 +17,87 @@ const C = {
 const ACCENT = "#8A8A2B";
 const ACCENT_LIGHT = "#B8B840";
 
+// 👉 Image path yaha daalna — public folder me file rakh ke path likh dena
+// e.g. image: "/products/fidgety.jpg"
 const PRODUCTS = [
   {
     "name": "Fidgety",
-    "tagline": "3-in-1 Wireless Charger + Holder",
     "code": "UG-GC34",
     "price": 1099,
-    "seed": "speaker-UG-GC34"
+    "desc": "A 3-in-1 wireless charging stand that powers your phone, earbuds and watch together \u2014 clean desk, one plug.",
+    "image": ""
   },
   {
     "name": "Tango",
-    "tagline": "Water Resistant Bluetooth Speaker",
     "code": "UG-GS13",
     "price": 1099,
-    "seed": "speaker-UG-GS13"
+    "desc": "Compact water-resistant speaker built for the outdoors, with punchy bass and a clip-on hook for travel.",
+    "image": ""
   },
   {
     "name": "Boom Pod",
-    "tagline": "10W Party Speaker with RGB Lights",
     "code": "UG-GS21",
     "price": 1699,
-    "seed": "speaker-UG-GS21"
+    "desc": "10W party speaker with built-in RGB lighting that syncs to the beat \u2014 great for get-togethers.",
+    "image": ""
   },
   {
     "name": "Echo Mini",
-    "tagline": "Pocket Bluetooth Speaker",
     "code": "UG-GS08",
     "price": 799,
-    "seed": "speaker-UG-GS08"
+    "desc": "A pocket-sized Bluetooth speaker that trades no sound quality for its tiny footprint.",
+    "image": ""
   },
   {
     "name": "Rove",
-    "tagline": "TWS Earbuds with Charging Case",
     "code": "UG-GS27",
     "price": 1299,
-    "seed": "speaker-UG-GS27"
+    "desc": "True wireless earbuds with a pocket charging case for all-day listening on the move.",
+    "image": ""
   },
   {
     "name": "Cadence",
-    "tagline": "Soundbar Style Desktop Speaker",
     "code": "UG-GS31",
     "price": 1899,
-    "seed": "speaker-UG-GS31"
+    "desc": "Soundbar-style desktop speaker that fills a room with rich, layered audio.",
+    "image": ""
   },
   {
     "name": "Pulse Mic",
-    "tagline": "Wireless Karaoke Mic Speaker",
     "code": "UG-GS19",
     "price": 1499,
-    "seed": "speaker-UG-GS19"
+    "desc": "Wireless karaoke mic with a built-in speaker \u2014 plug and sing anywhere.",
+    "image": ""
   },
   {
     "name": "Drift",
-    "tagline": "Waterproof Shower Speaker",
     "code": "UG-GS05",
     "price": 899,
-    "seed": "speaker-UG-GS05"
+    "desc": "Fully waterproof shower speaker that suction-mounts to any tile or glass.",
+    "image": ""
   },
   {
     "name": "Nova Bass",
-    "tagline": "Deep Bass Bluetooth Speaker",
     "code": "UG-GS42",
     "price": 2199,
-    "seed": "speaker-UG-GS42"
+    "desc": "Deep bass Bluetooth speaker tuned for music lovers who like it loud.",
+    "image": ""
   }
 ];
 
-function ProductCard({ product, index }) {
+function ProductImage({ image, name }) {
+  if (!image) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-1.5" style={{ background: "#ECECEC" }}>
+        <ImageOff size={22} style={{ color: "#B8BCC2" }} />
+        <span className="text-[10.5px]" style={{ color: "#9CA0AA" }}>Image coming soon</span>
+      </div>
+    );
+  }
+  return <img src={image} alt={name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]" />;
+}
+
+function ProductCard({ product, index, onPreview }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -98,42 +112,36 @@ function ProductCard({ product, index }) {
         boxShadow: "0 2px 10px rgba(11,27,58,0.05)",
       }}
     >
-      <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1", background: "#EFEFEF" }}>
-        <img
-          src={`https://picsum.photos/seed/${product.seed}/500/500`}
-          alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-        />
+      <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+        <ProductImage image={product.image} name={product.name} />
         <span
           className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide"
           style={{ background: ACCENT, color: C.white }}
         >
           SPEAKERS
         </span>
-        <span
-          className="absolute bottom-3 right-3 rounded-md px-2 py-1 text-[11px] font-semibold"
+        <motion.button
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
+          onClick={() => onPreview(product)}
+          className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
           style={{ background: "rgba(11,27,58,0.85)", color: C.goldLight }}
         >
-          MRP ₹{product.price}
-        </span>
+          <Eye size={13} />
+          Preview
+        </motion.button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 px-4 pt-3.5 pb-4">
+      <div className="flex flex-1 flex-col gap-1.5 px-4 pt-3.5 pb-4">
         <h3 className="text-[15px] font-bold" style={{ color: C.ink }}>
           {product.name}
         </h3>
-        <p className="text-[12.5px]" style={{ color: ACCENT }}>
-          {product.tagline}
-        </p>
-        <p className="text-[11.5px]" style={{ color: "#8A8F9C" }}>
-          Item Code {product.code}
-        </p>
-        <p className="text-[11.5px]" style={{ color: "#8A8F9C" }}>
-          Brand Urban Gear
+        <p className="text-[12.5px] leading-snug line-clamp-2" style={{ color: "#6B7180" }}>
+          {product.desc}
         </p>
 
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-[15px] font-bold" style={{ color: C.navy }}>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-[16px] font-bold" style={{ color: C.navy }}>
             Rs.{product.price}.00
           </span>
           <motion.button
@@ -151,8 +159,69 @@ function ProductCard({ product, index }) {
   );
 }
 
+function PreviewModal({ product, onClose }) {
+  return (
+    <AnimatePresence>
+      {product && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[60]"
+            style={{ background: "rgba(7,18,39,0.65)" }}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed left-1/2 top-1/2 z-[70] -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-lg overflow-hidden rounded-2xl"
+            style={{ background: C.white }}
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full"
+              style={{ background: "rgba(11,27,58,0.75)", color: C.white }}
+            >
+              <X size={16} />
+            </button>
+            <div style={{ aspectRatio: "1 / 1" }}>
+              <ProductImage image={product.image} name={product.name} />
+            </div>
+            <div className="p-5">
+              <h3 className="text-[19px] font-bold" style={{ color: C.ink }}>
+                {product.name}
+              </h3>
+              <p className="mt-1.5 text-[13.5px] leading-relaxed" style={{ color: "#6B7180" }}>
+                {product.desc}
+              </p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[19px] font-bold" style={{ color: C.navy }}>
+                  Rs.{product.price}.00
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold"
+                  style={{ background: ACCENT, color: C.white }}
+                >
+                  <ShoppingBag size={15} />
+                  Add to Cart
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function SpeakersCategory() {
   const [sort, setSort] = useState("popular");
+  const [previewProduct, setPreviewProduct] = useState(null);
 
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: C.paper, minHeight: "100vh" }}>
@@ -231,10 +300,12 @@ export default function SpeakersCategory() {
           {[...PRODUCTS]
             .sort((a, b) => (sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : 0))
             .map((p, i) => (
-              <ProductCard key={p.code} product={p} index={i} />
+              <ProductCard key={p.code} product={p} index={i} onPreview={setPreviewProduct} />
             ))}
         </div>
       </div>
+
+      <PreviewModal product={previewProduct} onClose={() => setPreviewProduct(null)} />
     </div>
   );
 }

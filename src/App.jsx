@@ -12,11 +12,16 @@ import Category4 from './Component/Category/Category4'
 import Category5 from './Component/Category/Category5'
 import Category6 from './Component/Category/Category6'
 import Category7 from './Component/Category/Category7'
+import Products from './Pages/Products'
+import DesignStudio from './Pages/DesignStudio'
+import ScrollToTop from './Component/ScrollToTop'
+import Contact from './Pages/Contact'
 
 const App = () => {
   return (
     <>
       <BrowserRouter>
+      <ScrollToTop/>
         <Navbar />
         <Routes>
           <Route path='/' element={<Home />} />
@@ -29,6 +34,9 @@ const App = () => {
           <Route path='/category/office' element={<Category5 />} />
           <Route path='/category/apparel' element={<Category6 />} />
           <Route path='/category/eco' element={<Category7 />} />
+          <Route path='/product' element={<Products/>}/>
+          <Route path='design-studio' element={<DesignStudio/>}/>
+          <Route path='/contact' element={<Contact/>}/>
         </Routes>
         <Footer />
       </BrowserRouter>

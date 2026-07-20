@@ -123,13 +123,10 @@ export default function Navbar() {
 
             {/* Logo */}
             <a href="#" className="flex items-center justify-center h-16 w-16 sm:h-[68px] sm:w-[68px] shrink-0 py-1.5">
-              <motion.div
-                className="h-full w-full rounded-full flex items-center justify-center font-bold text-lg"
-                style={{
-                  background: `linear-gradient(135deg, ${C.goldLight}, ${C.gold})`,
-                  color: C.navy,
-                  boxShadow: "0 0 14px rgba(201,162,39,0.45)",
-                }}
+              <motion.img
+                src="/logo.png"
+                alt="Company Logo"
+                className="h-full w-full object-contain drop-shadow-[0_0_10px_rgba(201,162,39,0.35)]"
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: [0, -3, 0] }}
                 transition={{
@@ -137,9 +134,7 @@ export default function Navbar() {
                   y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
                 }}
                 whileHover={{ scale: 1.08, rotate: -2 }}
-              >
-                V
-              </motion.div>
+              />
             </a>
 
             {/* Right side: search (desktop) + icons */}
@@ -344,11 +339,8 @@ export default function Navbar() {
           className="flex items-center justify-between px-5 pt-5 pb-4"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full font-bold text-sm"
-            style={{ background: `linear-gradient(135deg, ${C.goldLight}, ${C.gold})`, color: C.navy }}
-          >
-            V
+          <span className="flex items-center h-9">
+            <img src="/logo.png" alt="Company Logo" className="h-full w-auto object-contain" />
           </span>
           <button
             onClick={() => setOpen(false)}
