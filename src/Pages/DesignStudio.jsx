@@ -58,9 +58,13 @@ export default function DesignStudio() {
   const [inverted, setInverted] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 }); // px offset from center — logo drag position
+  const [isDragging, setIsDragging] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [isBaking, setIsBaking] = useState(false);
   const fileInputRef = useRef(null);
+  const safeAreaRef = useRef(null);
+  const dragStartRef = useRef({ x: 0, y: 0 });
 
   const handleFile = (file) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -86,6 +90,7 @@ export default function DesignStudio() {
     resetAdjustments();
     setZoom(100);
     setRotation(0);
+    setPosition({ x: 0, y: 0 });
   };
 
   const rotateLeft = () => setRotation((r) => r - 90);
@@ -93,6 +98,49 @@ export default function DesignStudio() {
   const resetTransform = () => {
     setZoom(100);
     setRotation(0);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  // ---- Drag-to-reposition: user picks up the logo and moves it anywhere
+  // inside the box (e.g. off-center, to a side) instead of it staying fixed
+  // in the middle. Works with both mouse and touch (pointer events).
+  const clampPosition = (x, y) => {
+    if (!safeAreaRef.current) return { x, y };
+    const rect = safeAreaRef.current.getBoundingClientRect();
+    const maxX = rect.width / 2;
+    const maxY = rect.height / 2;
+    return {
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    };
+  };
+
+  const handlePointerDown = (e) => {
+    if (!uploadedImage) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return;
+    const nextX = e.clientX - dragStartRef.current.x;
+    const nextY = e.clientY - dragStartRef.current.y;
+    setPosition(clampPosition(nextX, nextY));
+  };
+
+  const handlePointerUp = (e) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* no-op */
+    }
   };
 
   // Bakes contrast, recolor, rotation and zoom permanently into the actual
@@ -113,8 +161,13 @@ export default function DesignStudio() {
         const drawW = img.width * fitScale;
         const drawH = img.height * fitScale;
 
+        // convert on-screen drag offset (px) into canvas-space offset
+        const rect = safeAreaRef.current?.getBoundingClientRect();
+        const posScale = rect ? CANVAS_SIZE / rect.width : 1;
+
         ctx.save();
         ctx.translate(CANVAS_SIZE / 2, CANVAS_SIZE / 2);
+        ctx.translate(position.x * posScale, position.y * posScale);
         ctx.rotate((rotation * Math.PI) / 180);
         ctx.scale(zoom / 100, zoom / 100);
         ctx.filter = `contrast(${contrast}%) ${inverted ? "invert(1)" : ""}`;
@@ -147,12 +200,12 @@ export default function DesignStudio() {
     try {
       const finalImage = await bakeFinalImage();
       navigate("/review-design", {
-        state: { ...productInfo, image: finalImage, contrast, recolor, inverted, zoom, rotation },
+        state: { ...productInfo, image: finalImage, contrast, recolor, inverted, zoom, rotation, position },
       });
     } catch {
       // fallback: still proceed with the original image if baking fails
       navigate("/review-design", {
-        state: { ...productInfo, image: uploadedImage, contrast, recolor, inverted, zoom, rotation },
+        state: { ...productInfo, image: uploadedImage, contrast, recolor, inverted, zoom, rotation, position },
       });
     } finally {
       setIsBaking(false);
@@ -258,6 +311,11 @@ export default function DesignStudio() {
               <p className="mt-3 text-[12px] leading-relaxed" style={{ color: "#7A8092" }}>
                 Or drag and drop an image straight onto the box on the right. PNG or JPG, up to 25MB.
               </p>
+              {uploadedImage && (
+                <p className="mt-2 text-[12px] leading-relaxed font-medium" style={{ color: C.navy }}>
+                  Tip: click and drag the logo on the box to move it — center, left, right, wherever you want.
+                </p>
+              )}
             </>
           )}
 
@@ -311,6 +369,7 @@ export default function DesignStudio() {
 
               {/* safe area / drop zone */}
               <div
+                ref={safeAreaRef}
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={onDrop}
@@ -336,11 +395,17 @@ export default function DesignStudio() {
                     <img
                       src={uploadedImage}
                       alt="Your design"
-                      className="max-h-full max-w-full object-contain"
+                      draggable={false}
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      className="max-h-full max-w-full object-contain select-none"
                       style={{
                         filter: `contrast(${contrast}%) ${inverted ? "invert(1)" : ""}`,
-                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                        transition: "transform 0.2s ease",
+                        transform: `translate(${position.x}px, ${position.y}px) scale(${zoom / 100}) rotate(${rotation}deg)`,
+                        transition: isDragging ? "none" : "transform 0.2s ease",
+                        cursor: isDragging ? "grabbing" : "grab",
+                        touchAction: "none",
                       }}
                     />
                     {recolor && (
@@ -350,10 +415,19 @@ export default function DesignStudio() {
                           background: recolor,
                           mixBlendMode: "color",
                           opacity: 0.85,
-                          transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                          transition: "transform 0.2s ease",
+                          transform: `translate(${position.x}px, ${position.y}px) scale(${zoom / 100}) rotate(${rotation}deg)`,
+                          transition: isDragging ? "none" : "transform 0.2s ease",
                         }}
                       />
+                    )}
+                    {/* subtle hint so it's obvious the logo can be dragged around */}
+                    {!isDragging && (
+                      <span
+                        className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-1 text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                        style={{ background: "rgba(11,27,58,0.7)", color: C.white }}
+                      >
+                        Drag to move
+                      </span>
                     )}
                     <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
@@ -410,7 +484,7 @@ export default function DesignStudio() {
             </button>
 
             <div className="w-px h-5" style={{ background: "rgba(11,27,58,0.12)" }} />
-            <button onClick={resetTransform} title="Reset zoom & rotation" className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: "#F1F0EC" }}>
+            <button onClick={resetTransform} title="Reset zoom, rotation & position" className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: "#F1F0EC" }}>
               <Settings size={13} style={{ color: C.ink }} />
             </button>
           </div>
