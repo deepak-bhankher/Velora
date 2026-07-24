@@ -496,20 +496,20 @@ export default function DesignStudio() {
                         Drag to move
                       </span>
                     )}
-                    <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-2 right-2 flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setShowAdjust(true)}
-                        className="flex h-7 w-7 items-center justify-center rounded-full"
+                        className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-full"
                         style={{ background: "rgba(11,27,58,0.8)", color: C.white }}
                       >
-                        <Settings size={13} />
+                        <Settings size={14} />
                       </button>
                       <button
                         onClick={removeImage}
-                        className="flex h-7 w-7 items-center justify-center rounded-full"
+                        className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-full"
                         style={{ background: "rgba(122,31,43,0.85)", color: C.white }}
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </div>
                   </div>
